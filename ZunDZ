@@ -1,0 +1,190 @@
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Tạo ScreenGui chứa tất cả giao diện
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "CustomGui"
+screenGui.Parent = playerGui
+
+-- Tạo khung GUI chính với kích thước đã điều chỉnh
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 280, 0, 180) -- Tăng chiều rộng khung chính
+mainFrame.Position = UDim2.new(0.5, -140, 0.5, -90)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+mainFrame.BorderSizePixel = 15 -- Tăng chiều cao viền đen cho khung chính
+mainFrame.Visible = false
+mainFrame.Parent = screenGui
+
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 10) -- Bo góc khung chính
+uiCorner.Parent = mainFrame
+
+-- Thêm nút bật/tắt tính năng đặc biệt
+local specialToggleButton = Instance.new("TextButton")
+specialToggleButton.Size = UDim2.new(0, 210, 0, 40) -- Kích thước nút
+specialToggleButton.Position = UDim2.new(0.07, 0, 0.15, 0)
+specialToggleButton.Text = "Tính năng Đặc biệt TẮT"
+specialToggleButton.TextScaled = true
+specialToggleButton.TextSize = 18 -- Kích thước chữ
+specialToggleButton.Font = Enum.Font.SourceSansBold -- Phông chữ phù hợp với tiếng Việt
+specialToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+specialToggleButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0) -- Viền đen cho chữ
+specialToggleButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+specialToggleButton.BorderSizePixel = 0
+specialToggleButton.Parent = mainFrame
+
+local uiCornerSpecial = Instance.new("UICorner")
+uiCornerSpecial.CornerRadius = UDim.new(0, 10) -- Bo góc nút tính năng đặc biệt
+uiCornerSpecial.Parent = specialToggleButton
+
+-- Thêm nút bật/tắt X-Ray
+local xrayToggleButton = Instance.new("TextButton")
+xrayToggleButton.Size = UDim2.new(0, 210, 0, 40) -- Kích thước nút
+xrayToggleButton.Position = UDim2.new(0.07, 0, 0.45, 0) -- Sắp xếp sát với nút trên
+xrayToggleButton.Text = "X-Ray TẮT"
+xrayToggleButton.TextScaled = true
+xrayToggleButton.TextSize = 18 -- Kích thước chữ
+xrayToggleButton.Font = Enum.Font.SourceSansBold -- Phông chữ phù hợp với tiếng Việt
+xrayToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+xrayToggleButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0) -- Viền đen cho chữ
+xrayToggleButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+xrayToggleButton.BorderSizePixel = 0
+xrayToggleButton.Parent = mainFrame
+
+local uiCornerXray = Instance.new("UICorner")
+uiCornerXray.CornerRadius = UDim.new(0, 10) -- Bo góc nút X-Ray
+uiCornerXray.Parent = xrayToggleButton
+
+-- GUI nhỏ để mở GUI chính
+local miniButton = Instance.new("TextButton")
+miniButton.Size = UDim2.new(0, 50, 0, 50) -- Kích thước nút nhỏ thành hình vuông
+miniButton.Position = UDim2.new(0, 10, 0.5, -25)
+miniButton.Text = "" -- Xoá chữ "Mở GUI"
+miniButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Màu đen
+miniButton.BorderSizePixel = 0
+miniButton.Parent = screenGui
+
+local uiCornerMini = Instance.new("UICorner")
+uiCornerMini.CornerRadius = UDim.new(0, 10) -- Bo góc nút nhỏ
+uiCornerMini.Parent = miniButton
+
+-- Biến để theo dõi trạng thái kéo
+local dragging = false
+local dragInput
+local dragStart
+local startPos
+
+-- Hàm để cập nhật vị trí của nút khi kéo
+local function update(input)
+    local delta = input.Position - dragStart
+    miniButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+-- Khi bắt đầu kéo
+miniButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = miniButton.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+-- Khi đang kéo
+miniButton.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+-- Khi kết thúc kéo
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if input == dragInput then
+        update(input)
+    end
+end)
+
+-- Khi nhấn vào GUI nhỏ, mở GUI chính và ẩn GUI nhỏ
+miniButton.MouseButton1Click:Connect(function()
+    if not dragging then
+        mainFrame.Visible = true
+        miniButton.Visible = false
+    end
+end)
+
+-- Nút đóng GUI chính với vị trí điều chỉnh
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 30, 0, 30) -- Kích thước nút đóng
+closeButton.Position = UDim2.new(1, -40, 0, 10) -- Điều chỉnh vị trí nút đóng sang trái
+closeButton.Text = "X"
+closeButton.TextScaled = true
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+closeButton.BorderSizePixel = 0
+closeButton.Parent = mainFrame
+
+local uiCornerClose = Instance.new("UICorner")
+uiCornerClose.CornerRadius = UDim.new(0, 10) -- Bo góc nút đóng
+uiCornerClose.Parent = closeButton
+
+-- Khi nhấn nút đóng, ẩn GUI chính và hiện GUI nhỏ
+closeButton.MouseButton1Click:Connect(function()
+    mainFrame.Visible = false
+    miniButton.Visible = true
+end)
+
+-- Bật/tắt tính năng đặc biệt
+local specialEnabled = false
+specialToggleButton.MouseButton1Click:Connect(function()
+    specialEnabled = not specialEnabled
+    if specialEnabled then
+        specialToggleButton.Text = "Tính năng Đặc biệt BẬT"
+        specialToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+        -- Gọi hàm kích hoạt tính năng ở đây
+    else
+        specialToggleButton.Text = "Tính năng Đặc biệt TẮT"
+        specialToggleButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+        -- Gọi hàm tắt tính năng ở đây
+    end
+end)
+
+-- Bật/tắt X-Ray Vision
+local xrayEnabled = false
+xrayToggleButton.MouseButton1Click:Connect(function()
+    xrayEnabled = not xrayEnabled
+    if xrayEnabled then
+        xrayToggleButton.Text = "X-Ray BẬT"
+        xrayToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+        -- Kích hoạt X-Ray (tăng Transparency)
+        for _, part in pairs(workspace:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Transparency = 0.5
+            end
+        end
+    else
+        xrayToggleButton.Text = "X-Ray TẮT"
+        xrayToggleButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+        -- Tắt X-Ray (đặt lại Transparency)
+        for _, part in pairs(workspace:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Transparency = 0
+            end
+        end
+    end
+end)
+
+-- Mở GUI chính bằng phím Right Control trên PC
+local userInputService = game:GetService("UserInputService")
+userInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.RightControl then
+        mainFrame.Visible = not mainFrame.Visible
+        miniButton.Visible = not mainFrame.Visible
+    end
+end)
+
